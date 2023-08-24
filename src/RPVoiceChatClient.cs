@@ -1,11 +1,6 @@
 ﻿using rpvoicechat.Networking;
-using RPVoiceChat;
-using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.CommandAbbr;
-using Vintagestory.API.Server;
-using Vintagestory.API.Util;
 
 namespace rpvoicechat
 {
@@ -16,10 +11,9 @@ namespace rpvoicechat
         private PatchManager patchManager;
         private RPVoiceChatNativeNetworkClient client;
 
-        public ICoreClientAPI capi;
+        protected ICoreClientAPI capi;
 
         private MainConfig configGui;
-        private DebugMenuDialog debugMenu;
 
         private bool mutePressed = false;
         private bool voiceMenuPressed = false;
@@ -49,13 +43,11 @@ namespace rpvoicechat
             //client.OnClientDisconnected += VoiceClientDisconnected;
 
             client.OnAudioReceived += OnAudioReceived;
-            client.OnDebugReceived += OnDebugReceived;
 
-            // Initialize guis
+            // Initialize gui
             configGui = new MainConfig(capi, micManager, audioOutputManager);
-            debugMenu = new DebugMenuDialog(capi, audioOutputManager);
-            capi.Gui.RegisterDialog(new SpeechIndicator(capi, micManager));
-            capi.Gui.RegisterDialog(new VoiceLevelIcon(capi, micManager));
+            api.Gui.RegisterDialog(new SpeechIndicator(capi, micManager));
+            api.Gui.RegisterDialog(new VoiceLevelIcon(capi, micManager));
 
             // Set up keybinds
             capi.Input.RegisterHotKey("voicechatMenu", "RPVoice: Config menu", GlKeys.P, HotkeyType.GUIOrOtherControls);
@@ -99,7 +91,7 @@ namespace rpvoicechat
                 return true;
             });
 
-            // Recording eventhandler
+
             micManager.OnBufferRecorded += (buffer, length, voiceLevel) =>
             {
                 if (buffer == null)
@@ -117,10 +109,6 @@ namespace rpvoicechat
                 client.SendAudioToServer(packet);
             };
 
-            // Register clientside commands
-            
-
-            // At world load launch the audio managers
             capi.Event.LevelFinalize += OnLoad;
         }
 
@@ -142,13 +130,6 @@ namespace rpvoicechat
 
         }
 
-        // Network Events
-        private void OnDebugReceived(DebugCommand command)
-        {
-            if (command.Command == "OpenDebugMenu")
-                debugMenu.TryOpen();
-        }
-
         private void OnAudioReceived(AudioPacket obj)
         {
             audioOutputManager.HandleAudioPacket(obj);
@@ -159,8 +140,7 @@ namespace rpvoicechat
             micManager?.Dispose();
             patchManager?.Dispose();
             //client?.Dispose();
-            configGui?.Dispose();
-            debugMenu?.Dispose();
+            configGui.Dispose();
             //client = null;
         }
     }

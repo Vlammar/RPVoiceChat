@@ -37,7 +37,7 @@ namespace rpvoicechat
 
         public bool isReady = false;
         public EffectsExtension EffectsExtension;
-        public ConcurrentDictionary<string, PlayerAudioSource> PlayerSources = new ConcurrentDictionary<string, PlayerAudioSource>();
+        private ConcurrentDictionary<string, PlayerAudioSource> playerSources = new ConcurrentDictionary<string, PlayerAudioSource>();
         private PlayerAudioSource localPlayerAudioSource;
 
         public AudioOutputManager(ICoreClientAPI api)
@@ -64,7 +64,7 @@ namespace rpvoicechat
 
             await Task.Run(() =>
             {
-                if (PlayerSources.TryGetValue(packet.PlayerId, out var source))
+                if (playerSources.TryGetValue(packet.PlayerId, out var source))
                 {
                     // Update the voice level if it has changed
                     // Not sure about this one, might be better to just update the voice level every time we update the player
@@ -84,7 +84,7 @@ namespace rpvoicechat
 
                     var newSource = new PlayerAudioSource(player, this, capi);
                     newSource.QueueAudio(packet.AudioData, packet.Length);
-                    if (!PlayerSources.TryAdd(packet.PlayerId, newSource))
+                    if (!playerSources.TryAdd(packet.PlayerId, newSource))
                     {
                         capi.Logger.Error("Could not add new player to sources !");
                     }
@@ -124,7 +124,7 @@ namespace rpvoicechat
                 IsLocational = true
             };
 
-            if (PlayerSources.TryAdd(player.PlayerUID, playerSource) == false)
+            if (playerSources.TryAdd(player.PlayerUID, playerSource) == false)
             {
                 capi.Logger.Warning($"Failed to add player {player.PlayerName} as source !");
             }
@@ -143,7 +143,7 @@ namespace rpvoicechat
             }
             else
             {
-                if (PlayerSources.TryRemove(player.PlayerUID, out var playerAudioSource))
+                if (playerSources.TryRemove(player.PlayerUID, out var playerAudioSource))
                 {
                     playerAudioSource.Dispose();
                 }

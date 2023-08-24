@@ -1,10 +1,8 @@
-﻿using System;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using rpvoicechat.Networking;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.CommandAbbr;
 using Vintagestory.API.Server;
-using Vintagestory.API.Util;
 
 namespace rpvoicechat
 {
@@ -24,7 +22,7 @@ namespace rpvoicechat
             sapi.World.Config.SetInt("rpvoicechat:distance-shout", sapi.World.Config.GetInt("rpvoicechat:distance-shout", (int)VoiceLevel.Shouting));
 
             // Register commands
-            RegisterCommands();
+            registerCommands();
         }
 
         public override bool ShouldLoad(EnumAppSide forSide)
@@ -32,7 +30,7 @@ namespace rpvoicechat
             return forSide == EnumAppSide.Server;
         }
 
-        private void RegisterCommands()
+        private void registerCommands()
         {
             var parsers = sapi.ChatCommands.Parsers;
 
@@ -64,18 +62,6 @@ namespace rpvoicechat
                     .WithDesc("Resets the audio distances to their default settings")
                     .HandleWith(ResetDistanceHandler)
                 .EndSub();
-
-            sapi.ChatCommands.GetOrCreate("rpvcdebug").RequiresPrivilege(Privilege.chat).RequiresPlayer().WithDesc("The command to open the debug menu for RPVoiceChat").HandleWith(OpenDebug);
-        }
-
-        private TextCommandResult OpenDebug(TextCommandCallingArgs args)
-        {
-            if (!authors.Contains(args.Caller.Player.PlayerName) && !args.Caller.HasPrivilege(Privilege.controlserver)) return TextCommandResult.Error("You do not have the permissions needed for this command!");
-
-
-            server.SendDebugCommand((IServerPlayer)args.Caller.Player, "OpenDebugMenu");
-            
-            return TextCommandResult.Success("");
         }
 
         private TextCommandResult ResetDistanceHandler(TextCommandCallingArgs args)
