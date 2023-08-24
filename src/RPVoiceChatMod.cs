@@ -1,4 +1,5 @@
-﻿using Vintagestory.API.Client;
+﻿using System.Collections.Generic;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
 namespace rpvoicechat
@@ -7,6 +8,7 @@ namespace rpvoicechat
     {
         protected RPVoiceChatConfig config;
         protected const string modID = "rpvoicechat";
+        protected string[] authors = {"Ridderrasmus", "blakdragan7", "purplep_", "Dmitry221060"};
 
         protected INetworkChannel networkChannel;
 
@@ -20,7 +22,8 @@ namespace rpvoicechat
         {
             // Register network channel
             networkChannel = api.Network.RegisterChannel("rpvoicechat")
-                .RegisterMessageType(typeof(ConnectionInfo));
+                .RegisterMessageType(typeof(ConnectionInfo))
+                .RegisterMessageType(typeof(DebugCommand));
 
         }
     }

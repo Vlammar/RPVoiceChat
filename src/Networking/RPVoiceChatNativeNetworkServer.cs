@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
 namespace rpvoicechat.Networking
@@ -45,6 +46,12 @@ namespace rpvoicechat.Networking
 
                 channel.SendPacket(packet, closePlayer as IServerPlayer);
             }
+        }
+
+        public void SendDebugCommand(IServerPlayer player, string command)
+        {
+            DebugCommand packet = new DebugCommand() { Command = "OpenDebugMenu"};
+            channel.SendPacket(packet, player);
         }
     }
 }
