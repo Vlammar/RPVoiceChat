@@ -60,11 +60,13 @@ namespace rpvoicechat
             config = ModConfig.Config;
             MaxInputThreshold = config.MaxInputThreshold;
             SetThreshold(config.InputThreshold);
+            return;
             capture = new AudioCapture(config.CurrentInputDevice, Frequency, ALFormat.Mono16, BufferSize);
         }
 
         public void Launch()
         {
+            return;
             audioProcessingThread.Start();
             gameTickId = capi.Event.RegisterGameTickListener(UpdateCaptureAudioSamples, 100);
             capture.Start();
