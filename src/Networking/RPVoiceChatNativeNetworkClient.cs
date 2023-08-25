@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RPVoiceChat.src.Networking.Packets;
 using Vintagestory.API.Client;
 
 namespace RPVoiceChat.Networking

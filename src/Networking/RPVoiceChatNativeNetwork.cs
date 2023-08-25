@@ -1,5 +1,4 @@
-﻿using RPVoiceChat.src.Networking.Packets;
-using Vintagestory.API.Common;
+﻿using Vintagestory.API.Common;
 
 namespace RPVoiceChat.Networking
 {
