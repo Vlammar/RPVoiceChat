@@ -39,7 +39,7 @@ public class PlayerAudioSource : IDisposable
         { VoiceLevel.Shouting, "rpvoicechat:distance-shout" },
     };
 
-    private IPlayer player;
+    public IPlayer Player { get; private set; }
 
     private FilterLowpass lowpassFilter;
 
@@ -47,7 +47,7 @@ public class PlayerAudioSource : IDisposable
     {
         EffectsExtension = manager.EffectsExtension;
         outputManager = manager;
-        this.player = player;
+        this.Player = player;
         this.capi = capi;
         StartTick();
         capi.Event.EnqueueMainThreadTask(() =>
@@ -85,7 +85,7 @@ public class PlayerAudioSource : IDisposable
 
     public void UpdatePlayer(float dt)
     {
-        EntityPos speakerPos = player.Entity?.SidedPos;
+        EntityPos speakerPos = Player.Entity?.SidedPos;
         EntityPos listenerPos = capi.World.Player.Entity?.SidedPos;
         if (speakerPos == null || listenerPos == null)
 
@@ -95,7 +95,7 @@ public class PlayerAudioSource : IDisposable
         BlockSelection blocks = new BlockSelection();
         EntitySelection entities = new EntitySelection();
         capi.World.RayTraceForSelection(
-            LocationUtils.GetLocationOfPlayer(player),
+            LocationUtils.GetLocationOfPlayer(Player),
             LocationUtils.GetLocationOfPlayer(capi),
             ref blocks,
             ref entities
@@ -128,16 +128,16 @@ public class PlayerAudioSource : IDisposable
 
         // If the player has a temporal stability of less than 0.7, then the player's voice should be distorted
         // Values are temporary currently
-        if (player.Entity.WatchedAttributes.GetDouble("temporalStability") < 0.5)
+        if (Player.Entity.WatchedAttributes.GetDouble("temporalStability") < 0.5)
         {
 
         }
 
         // If the player is drunk, then the player's voice should be affected
         // Values are temporary currently
-        if (player.Entity.WatchedAttributes.GetFloat("intoxication") > 0.2)
+        if (Player.Entity.WatchedAttributes.GetFloat("intoxication") > 0.2)
         {
-            var drunkness = player.Entity.WatchedAttributes.GetFloat("intoxication");
+            var drunkness = Player.Entity.WatchedAttributes.GetFloat("intoxication");
             var pitch = 1 - (drunkness / 2);
             AL.Source(source, ALSourcef.Pitch, pitch);
             Util.CheckError("Error setting source Pitch", capi);

@@ -1,12 +1,8 @@
 ﻿using Vintagestory.API.Client;
-using Vintagestory.API.Common.Entities;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading.Tasks;
-using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using Vintagestory.API.Common;
-using Vintagestory.API.Util;
 
 namespace rpvoicechat
 {
@@ -21,16 +17,16 @@ namespace rpvoicechat
             set
             {
                 isLoopbackEnabled = value;
-                if (localPlayerAudioSource == null)
+                if (LocalPlayerAudioSource == null)
                     return;
 
                 if (isLoopbackEnabled)
                 {
-                    localPlayerAudioSource.StartPlaying();
+                    LocalPlayerAudioSource.StartPlaying();
                 }
                 else
                 {
-                    localPlayerAudioSource.StopPlaying();
+                    LocalPlayerAudioSource.StopPlaying();
                 }
             }
         }
@@ -38,7 +34,7 @@ namespace rpvoicechat
         public bool isReady = false;
         public EffectsExtension EffectsExtension;
         public ConcurrentDictionary<string, PlayerAudioSource> PlayerSources = new ConcurrentDictionary<string, PlayerAudioSource>();
-        private PlayerAudioSource localPlayerAudioSource;
+        public PlayerAudioSource LocalPlayerAudioSource { get; private set; }
 
         public AudioOutputManager(ICoreClientAPI api)
         {
@@ -97,12 +93,12 @@ namespace rpvoicechat
             if (!IsLoopbackEnabled)
                 return;
 
-            localPlayerAudioSource.QueueAudio(audioData, length);
+            LocalPlayerAudioSource.QueueAudio(audioData, length);
         }
 
         public void ClientLoaded()
         {
-            localPlayerAudioSource = new PlayerAudioSource(capi.World.Player, this, capi)
+            LocalPlayerAudioSource = new PlayerAudioSource(capi.World.Player, this, capi)
             {
                 IsMuffled = false,
                 IsReverberated = false,
@@ -110,7 +106,7 @@ namespace rpvoicechat
             };
 
             if (!isLoopbackEnabled) return;
-            localPlayerAudioSource.StartPlaying();
+            LocalPlayerAudioSource.StartPlaying();
         }
 
         public void PlayerSpawned(IPlayer player)
@@ -138,19 +134,37 @@ namespace rpvoicechat
         {
             if (player.ClientId == capi.World.Player.ClientId)
             {
-                localPlayerAudioSource.Dispose();
-                localPlayerAudioSource = null;
+                LocalPlayerAudioSource.Dispose();
+                LocalPlayerAudioSource = null;
+                return;
+            }
+            
+            if (PlayerSources.TryRemove(player.PlayerUID, out var playerAudioSource))
+            {
+                playerAudioSource.Dispose();
             }
             else
             {
-                if (PlayerSources.TryRemove(player.PlayerUID, out var playerAudioSource))
-                {
-                    playerAudioSource.Dispose();
-                }
-                else
-                {
-                    capi.Logger.Warning($"Failed to remove player {player.PlayerName}");
-                }
+                capi.Logger.Warning($"Failed to remove player {player.PlayerName}");
+            }
+        }
+
+        public void SpawnTestSource(string sourceKey)
+        {
+            var testSource = new PlayerAudioSource(null, this, capi)
+            {
+                IsLocational = true,
+                IsMuffled = false,
+                IsReverberated = false
+            };
+
+            if (PlayerSources.TryAdd(sourceKey, testSource))
+            {
+                testSource.StartPlaying();
+            }
+            else
+            {
+                capi.Logger.Warning($"Failed to add test source {sourceKey}");
             }
         }
     }

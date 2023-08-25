@@ -19,7 +19,7 @@ namespace rpvoicechat
         public ICoreClientAPI capi;
 
         private MainConfig configGui;
-        private DebugMenuDialog debugMenu;
+        private DebugSourceListDialog debugMenu;
 
         private bool mutePressed = false;
         private bool voiceMenuPressed = false;
@@ -53,7 +53,7 @@ namespace rpvoicechat
 
             // Initialize guis
             configGui = new MainConfig(capi, micManager, audioOutputManager);
-            debugMenu = new DebugMenuDialog(capi, audioOutputManager);
+            debugMenu = new DebugSourceListDialog(capi, audioOutputManager);
             capi.Gui.RegisterDialog(new SpeechIndicator(capi, micManager));
             capi.Gui.RegisterDialog(new VoiceLevelIcon(capi, micManager));
 
