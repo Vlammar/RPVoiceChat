@@ -1,12 +1,10 @@
-﻿using System;
-using System.Net.Sockets;
-using rpvoicechat.Networking;
+﻿using RPVoiceChat.Networking;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.CommandAbbr;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
-namespace rpvoicechat
+namespace RPVoiceChat
 {
     public class RPVoiceChatServer : RPVoiceChatMod
     {

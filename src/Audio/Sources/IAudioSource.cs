@@ -1,6 +1,5 @@
-﻿using Mono.Cecil;
-using OpenTK.Audio.OpenAL;
-using rpvoicechat;
+﻿using OpenTK.Audio.OpenAL;
+using RPVoiceChat;
 using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;

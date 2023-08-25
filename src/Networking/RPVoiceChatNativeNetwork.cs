@@ -1,6 +1,7 @@
-﻿using Vintagestory.API.Common;
+﻿using RPVoiceChat.src.Networking.Packets;
+using Vintagestory.API.Common;
 
-namespace rpvoicechat.Networking
+namespace RPVoiceChat.Networking
 {
     public class RPVoiceChatNativeNetwork
     {

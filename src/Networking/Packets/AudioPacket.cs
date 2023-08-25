@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace rpvoicechat
+namespace RPVoiceChat
 {
     [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
     public class AudioPacket

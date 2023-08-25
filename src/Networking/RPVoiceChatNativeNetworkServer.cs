@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
-namespace rpvoicechat.Networking
+namespace RPVoiceChat.Networking
 {
     public class RPVoiceChatNativeNetworkServer : RPVoiceChatNativeNetwork
     {

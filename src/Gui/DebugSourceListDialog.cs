@@ -1,11 +1,6 @@
-﻿using Cairo;
-using Cairo.Util;
-using rpvoicechat;
-using System;
-using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
-using Vintagestory.API.Common;
 
 namespace RPVoiceChat
 {

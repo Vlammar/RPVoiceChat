@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using OpenTK.Audio.OpenAL;
 using Vintagestory.API.Common;
 
-namespace rpvoicechat
+namespace RPVoiceChat
 {
     public class AudioOutputManager
     {
