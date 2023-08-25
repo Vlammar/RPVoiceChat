@@ -17,11 +17,10 @@ namespace rpvoicechat.Networking
                 .SetMessageHandler<DebugCommand>(HandleDebugCommand);
         }
 
-        private void HandleDebugCommand(DebugCommand packet)
-        {
-            OnDebugReceived?.Invoke(packet);
-        }
-
+        /// <summary>
+        /// Sends audio data from the client to the server for it to distribute around to the clients.
+        /// </summary>
+        /// <param name="packet">Audio packet containing the audio data to send to the server.</param>
         public async void SendAudioToServer(AudioPacket packet)
         {
             await Task.Run(() =>
@@ -30,9 +29,22 @@ namespace rpvoicechat.Networking
             });
         }
 
+        /// <summary>
+        /// Invokes the audio recieved event.
+        /// </summary>
+        /// <param name="packet">Audio packet containing the audio data to send to the server.</param>
         private void HandleAudioPacket(AudioPacket packet)
         {
             OnAudioReceived?.Invoke(packet);
+        }
+
+        /// <summary>
+        /// Invokes the debug command received event.
+        /// </summary>
+        /// <param name="packet">The Debugcommand object that contains debug commands being passed along.</param>
+        private void HandleDebugCommand(DebugCommand packet)
+        {
+            OnDebugReceived?.Invoke(packet);
         }
     }
 }

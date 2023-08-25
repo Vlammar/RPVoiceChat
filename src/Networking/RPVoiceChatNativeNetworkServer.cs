@@ -24,12 +24,22 @@ namespace rpvoicechat.Networking
             channel = api.Network.GetChannel(ChannelName).SetMessageHandler<AudioPacket>(ReceivedAudioPacketFromClient);
         }
 
+        /// <summary>
+        /// This handles what to do when audio is received from a client.
+        /// </summary>
+        /// <param name="player">Player from which the audio was recieved.</param>
+        /// <param name="packet">Audio packet containing the audio data to send to the server.</param>
         private void ReceivedAudioPacketFromClient(IServerPlayer player, AudioPacket packet)
         {
             OnReceivedPacket?.Invoke(player, packet);
             SendAudioToAllClientsInRange(player, packet);
         }
 
+        /// <summary>
+        /// Sends the audio packet to all clients within the voice level range of the audio packet from the sending players position.
+        /// </summary>
+        /// <param name="player">Player from which the audio was recieved.</param>
+        /// <param name="packet">Audio packet containing the audio data to send to the server.</param>
         public void SendAudioToAllClientsInRange(IServerPlayer player, AudioPacket packet)
         {
             configKeyByVoiceLevel.TryGetValue(packet.VoiceLevel, out string key);
@@ -48,6 +58,11 @@ namespace rpvoicechat.Networking
             }
         }
 
+        /// <summary>
+        /// Sends the given debug command to the given player.
+        /// </summary>
+        /// <param name="player">Player that should receive this command.</param>
+        /// <param name="command">Command to be sent.</param>
         public void SendDebugCommand(IServerPlayer player, string command)
         {
             DebugCommand packet = new DebugCommand() { Command = "OpenDebugMenu"};

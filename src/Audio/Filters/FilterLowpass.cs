@@ -36,6 +36,9 @@ namespace rpvoicechat
             effectsExtension.Filter(filter, EfxFilterf.LowpassGain, gain);
         }
 
+        /// <summary>
+        /// Starts the lowpass filter.
+        /// </summary>
         public void Start()
         {
             if (IsEnabled)
@@ -45,6 +48,9 @@ namespace rpvoicechat
             IsEnabled = true;
         }
 
+        /// <summary>
+        /// Stops the lowpass filter.
+        /// </summary>
         public void Stop()
         {
             if (!IsEnabled)
@@ -54,6 +60,9 @@ namespace rpvoicechat
             IsEnabled = false;
         }
 
+        /// <summary>
+        /// Begins generating the filter and all the parts required for it.
+        /// </summary>
         private void GenerateFilter()
         {
             filter = effectsExtension.GenFilter();
