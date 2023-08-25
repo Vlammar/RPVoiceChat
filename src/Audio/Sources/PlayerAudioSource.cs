@@ -1,25 +1,15 @@
-﻿using System;
+﻿using RPVoiceChat;
+using System;
 using OpenTK.Audio.OpenAL;
 using rpvoicechat;
-using OpenTK.Audio;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
-using OpenTK;
 using Vintagestory.API.Common.Entities;
 using rpvoicechat.Utils;
-using System.Collections.Generic;
 
-
-public class PlayerAudioSource : IDisposable
+public class PlayerAudioSource : BaseAudioSource
 {
-    public const int BufferCount = 4;
-
-    private int source;
-
-    public EffectsExtension EffectsExtension;
-
-    private CircularAudioBuffer buffer;
     //private ReverbEffect reverbEffect;
 
     private ICoreClientAPI capi;
@@ -27,23 +17,14 @@ public class PlayerAudioSource : IDisposable
 
     private Vec3f lastSpeakerCoords;
     private long gameTickId;
-    public bool IsMuffled { get; set; } = false;
-    public bool IsReverberated { get; set; } = false;
-
-    public bool IsLocational { get; set; } = true;
-    public VoiceLevel voiceLevel { get; private set; } = VoiceLevel.Talking;
-    private static Dictionary<VoiceLevel, string> configKeyByVoiceLevel = new Dictionary<VoiceLevel, string>
-    {
-        { VoiceLevel.Whispering, "rpvoicechat:distance-whisper" },
-        { VoiceLevel.Talking, "rpvoicechat:distance-talk" },
-        { VoiceLevel.Shouting, "rpvoicechat:distance-shout" },
-    };
+    
+    public new VoiceLevel VoiceLevel { get; private set; } = VoiceLevel.Talking;
 
     public IPlayer Player { get; private set; }
 
     private FilterLowpass lowpassFilter;
 
-    public PlayerAudioSource(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi)
+    public PlayerAudioSource(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
     {
         EffectsExtension = manager.EffectsExtension;
         outputManager = manager;
@@ -73,7 +54,7 @@ public class PlayerAudioSource : IDisposable
 
     public void UpdateVoiceLevel(VoiceLevel voiceLevel)
     {
-        this.voiceLevel = voiceLevel;
+        VoiceLevel = voiceLevel;
         string key = configKeyByVoiceLevel[voiceLevel];
 
         capi.Event.EnqueueMainThreadTask(() =>
@@ -160,7 +141,7 @@ public class PlayerAudioSource : IDisposable
             lastSpeakerCoords = speakerCoords;
 
             // Adjust volume change due to distance based on speaker's voice level
-            string key = configKeyByVoiceLevel[voiceLevel];
+            string key = configKeyByVoiceLevel[VoiceLevel];
             var maxHearingDistance = capi.World.Config.GetInt(key);
             float distanceFactor = (float) (1.5 / Math.Sqrt(maxHearingDistance));
             var relativeSpeakerCoords = LocationUtils.GetRelativeSpeakerLocation(speakerPos, listenerPos);
@@ -244,14 +225,9 @@ public class PlayerAudioSource : IDisposable
         }, "PlayerAudioSource StopPlaying");
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
-        AL.SourceStop(source);
-        Util.CheckError("Error stop playing source", capi);
-
-        buffer?.Dispose();
-        AL.DeleteSource(source);
-        Util.CheckError("Error deleting source", capi);
+        base.Dispose();
 
         StopTick();
     }

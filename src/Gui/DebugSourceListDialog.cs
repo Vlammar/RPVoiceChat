@@ -65,13 +65,13 @@ namespace RPVoiceChat
 
             // Setup local player
             PlayerAudioSource localSource = audioOutputManager.LocalPlayerAudioSource;
-            composer.AddButton(localSource.Player.PlayerName, () => { api.ShowChatMessage("This is " + localSource.Player.PlayerName + " and they are " + Enum.GetName(typeof(VoiceLevel), localSource.voiceLevel)); return true; }, ElementBounds.Fixed(0, i, btnWidth, btnHeight));
+            composer.AddButton(localSource.Player.PlayerName, () => { api.ShowChatMessage("This is " + localSource.Player.PlayerName + " and they are " + Enum.GetName(typeof(VoiceLevel), localSource.VoiceLevel)); return true; }, ElementBounds.Fixed(0, i, btnWidth, btnHeight));
             i += btnHeight;
             
             // Setup each player audio source beside local player
             foreach (var keyValuePair in keyValuePairs)
             {
-                composer.AddButton(keyValuePair.Value.Player.PlayerName, () => { api.ShowChatMessage("This is " + keyValuePair.Value.Player.PlayerName + " and they are " + Enum.GetName(typeof(VoiceLevel), keyValuePair.Value.voiceLevel).ToLower()); return true; }, ElementBounds.Fixed(0, i, btnWidth, btnHeight));
+                composer.AddButton(keyValuePair.Value.Player.PlayerName, () => { api.ShowChatMessage("This is " + keyValuePair.Value.Player.PlayerName + " and they are " + Enum.GetName(typeof(VoiceLevel), keyValuePair.Value.VoiceLevel).ToLower()); return true; }, ElementBounds.Fixed(0, i, btnWidth, btnHeight));
                 i += btnHeight;
             }
 
