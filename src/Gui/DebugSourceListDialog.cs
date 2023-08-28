@@ -39,7 +39,7 @@ namespace RPVoiceChat
             Composers["rpvc"] = Compose(audioOutputManager.PlayerSources.ToArray()).Compose();
         }
 
-        private GuiComposer Compose(KeyValuePair<string, PlayerAudioSource>[] keyValuePairs)
+        private GuiComposer Compose(KeyValuePair<string, AudioSourcePlayer>[] keyValuePairs)
         {
 
             // General window
@@ -59,7 +59,7 @@ namespace RPVoiceChat
             int i = 0;
 
             // Setup local player
-            PlayerAudioSource localSource = audioOutputManager.LocalPlayerAudioSource;
+            AudioSourcePlayer localSource = audioOutputManager.LocalPlayerAudioSource;
             composer.AddButton(localSource.Player.PlayerName, () => { api.ShowChatMessage("This is " + localSource.Player.PlayerName + " and they are " + Enum.GetName(typeof(VoiceLevel), localSource.VoiceLevel)); return true; }, ElementBounds.Fixed(0, i, btnWidth, btnHeight));
             i += btnHeight;
             

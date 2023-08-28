@@ -6,7 +6,7 @@ using Vintagestory.API.Client;
 
 namespace RPVoiceChat
 {
-    public class BaseAudioSource : IDisposable
+    public class AudioSource : IDisposable
     {
         public const int BufferCount = 4;
 
@@ -29,7 +29,7 @@ namespace RPVoiceChat
             { VoiceLevel.Shouting, "rpvoicechat:distance-shout" },
         };
 
-        public BaseAudioSource (AudioOutputManager manager, ICoreClientAPI capi) 
+        public AudioSource (AudioOutputManager manager, ICoreClientAPI capi) 
         {
             this.manager = manager;
             this.capi = capi;

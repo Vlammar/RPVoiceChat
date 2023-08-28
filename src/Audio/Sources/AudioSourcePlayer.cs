@@ -7,7 +7,7 @@ using Vintagestory.API.Common.Entities;
 
 namespace RPVoiceChat
 {
-    public class PlayerAudioSource : BaseAudioSource
+    public class AudioSourcePlayer : AudioSource
     {
         //private ReverbEffect reverbEffect;
 
@@ -22,7 +22,7 @@ namespace RPVoiceChat
 
         private FilterLowpass lowpassFilter;
 
-        public PlayerAudioSource(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
+        public AudioSourcePlayer(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
         {
             this.Player = player;
             StartTick();

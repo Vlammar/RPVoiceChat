@@ -1,24 +1,26 @@
 ﻿using OpenTK.Audio.OpenAL;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace RPVoiceChat
 {
-    public class EffectWahwah
+    public class EffectWahwah : EffectBase
     {
-        private EffectsExtension effectsExtension;
-        private int source;
-        public int filter;
-    
-        public bool IsEnabled { get; set; } = false;
 
-        public EffectWahwah(EffectsExtension effectsExtension, int source)
+        public EffectWahwah(EffectsExtension effectsExtension, int source) : base(effectsExtension, source)
         {
-            this.source = source;
-            this.effectsExtension = effectsExtension;
-            GenerateEffect();
+            GenerateEffect(EfxEffectType.Autowah);
         }
 
-        private void GenerateEffect()
+
+        public override void GenerateEffect(EfxEffectType t)
         {
+            base.GenerateEffect(t);
+
+            effectsExtension.Effect(effect, EfxEffectf.AutowahResonance, 1f);
+            effectsExtension.Effect(effect, EfxEffectf.AutowahReleaseTime, 1f);
+            effectsExtension.Effect(effect, EfxEffectf.AutowahPeakGain, 1f);
+            effectsExtension.Effect(effect, EfxEffectf.AutowahAttackTime, 1f);
 
         }
     }

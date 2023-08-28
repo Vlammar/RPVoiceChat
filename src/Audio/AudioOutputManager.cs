@@ -33,8 +33,8 @@ namespace RPVoiceChat
 
         public bool isReady = false;
         public EffectsExtension EffectsExtension;
-        public ConcurrentDictionary<string, PlayerAudioSource> PlayerSources = new ConcurrentDictionary<string, PlayerAudioSource>();
-        public PlayerAudioSource LocalPlayerAudioSource { get; private set; }
+        public ConcurrentDictionary<string, AudioSourcePlayer> PlayerSources = new ConcurrentDictionary<string, AudioSourcePlayer>();
+        public AudioSourcePlayer LocalPlayerAudioSource { get; private set; }
 
         public AudioOutputManager(ICoreClientAPI api)
         {
@@ -78,7 +78,7 @@ namespace RPVoiceChat
                         return;
                     }
 
-                    var newSource = new PlayerAudioSource(player, this, capi);
+                    var newSource = new AudioSourcePlayer(player, this, capi);
                     newSource.QueueAudio(packet.AudioData, packet.Length);
                     if (!PlayerSources.TryAdd(packet.PlayerId, newSource))
                     {
@@ -98,7 +98,7 @@ namespace RPVoiceChat
 
         public void ClientLoaded()
         {
-            LocalPlayerAudioSource = new PlayerAudioSource(capi.World.Player, this, capi)
+            LocalPlayerAudioSource = new AudioSourcePlayer(capi.World.Player, this, capi)
             {
                 IsMuffled = false,
                 IsReverberated = false,
@@ -113,7 +113,7 @@ namespace RPVoiceChat
         {
             if (player.ClientId == capi.World.Player.ClientId) return;
 
-            var playerSource = new PlayerAudioSource(player, this, capi)
+            var playerSource = new AudioSourcePlayer(player, this, capi)
             {
                 IsMuffled = false,
                 IsReverberated = false,
@@ -151,7 +151,7 @@ namespace RPVoiceChat
 
         public void SpawnTestSource(string sourceKey)
         {
-            var testSource = new PlayerAudioSource(null, this, capi)
+            var testSource = new AudioSourcePlayer(null, this, capi)
             {
                 IsLocational = true,
                 IsMuffled = false,
