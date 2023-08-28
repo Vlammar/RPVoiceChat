@@ -7,14 +7,14 @@ using Vintagestory.API.Common.Entities;
 
 namespace RPVoiceChat
 {
-    public class AudioSourcePlayer : AudioSource
+    public class DynamicAudioSource : AudioSource
     {
         //private ReverbEffect reverbEffect;
 
         private ICoreClientAPI capi;
 
         private Vec3f lastSpeakerCoords;
-        private long gameTickId;
+
 
         public new VoiceLevel VoiceLevel { get; private set; } = VoiceLevel.Talking;
 
@@ -22,28 +22,14 @@ namespace RPVoiceChat
 
         private FilterLowpass lowpassFilter;
 
-        public AudioSourcePlayer(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
+        public DynamicAudioSource(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
         {
             this.Player = player;
-            StartTick();
+            IsLocational = true;
+            
             capi.Event.EnqueueMainThreadTask(() =>
             {
                 lastSpeakerCoords = player.Entity?.SidedPos?.XYZFloat;
-
-                source = AL.GenSource();
-                Util.CheckError("Error gen source", capi);
-                buffer = new CircularAudioBuffer(source, BufferCount, capi);
-
-                AL.Source(source, ALSourceb.Looping, false);
-                Util.CheckError("Error setting source looping", capi);
-                AL.Source(source, ALSourceb.SourceRelative, false);
-                Util.CheckError("Error setting source SourceRelative", capi);
-                AL.Source(source, ALSourcef.Gain, 1.0f);
-                Util.CheckError("Error setting source Gain", capi);
-                AL.Source(source, ALSourcef.Pitch, 1.0f);
-                Util.CheckError("Error setting source Pitch", capi);
-
-                //reverbEffect = new ReverbEffect(manager.EffectsExtension, source);
             }, "PlayerAudioSource Init");
         }
 
@@ -59,7 +45,7 @@ namespace RPVoiceChat
             }, "PlayerAudioSource update max distance");
         }
 
-        public void UpdatePlayer(float dt)
+        public new void UpdateSource(float dt)
         {
             EntityPos speakerPos = Player.Entity?.SidedPos;
             EntityPos listenerPos = capi.World.Player.Entity?.SidedPos;
@@ -167,67 +153,10 @@ namespace RPVoiceChat
             }
         }
 
-        public void StartTick()
-        {
-            if (gameTickId != 0)
-                return;
-            capi.Event.EnqueueMainThreadTask(() => { gameTickId = capi.Event.RegisterGameTickListener(UpdatePlayer, 100); }, "PlayerAudioSource Start");
-        }
+        
 
-        public void StopTick()
-        {
-            if (gameTickId == 0)
-                return;
+        
 
-            capi.Event.EnqueueMainThreadTask(() =>
-            {
-                capi.Event.UnregisterGameTickListener(gameTickId);
-                gameTickId = 0;
-            }, "PlayerAudioSource Start");
-        }
-
-        public void QueueAudio(byte[] audioBytes, int bufferLength)
-        {
-            capi.Event.EnqueueMainThreadTask(() =>
-            {
-                buffer.TryDequeBuffers();
-                buffer.QueueAudio(audioBytes, bufferLength, ALFormat.Mono16, MicrophoneManager.Frequency);
-
-                var state = AL.GetSourceState(source);
-                Util.CheckError("Error getting source state", capi);
-                // the source can stop playing if it finishes everything in queue
-                if (state != ALSourceState.Playing)
-                {
-                    StartPlaying();
-                }
-            }, "PlayerAudioSource QueueAudio");
-        }
-
-        public void StartPlaying()
-        {
-            StartTick();
-            capi.Event.EnqueueMainThreadTask(() =>
-            {
-                AL.SourcePlay(source);
-                Util.CheckError("Error playing source", capi);
-            }, "PlayerAudioSource StartPlaying");
-        }
-
-        public void StopPlaying()
-        {
-            StopTick();
-            capi.Event.EnqueueMainThreadTask(() =>
-            {
-                AL.SourceStop(source);
-                Util.CheckError("Error stop playing source", capi);
-            }, "PlayerAudioSource StopPlaying");
-        }
-
-        public new void Dispose()
-        {
-            base.Dispose();
-
-            StopTick();
-        }
+        
     }
 }
