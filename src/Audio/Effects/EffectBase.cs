@@ -1,16 +1,17 @@
-﻿using OpenTK.Audio.OpenAL;
+﻿using OpenTK;
+using OpenTK.Audio.OpenAL;
 using System;
 
 namespace RPVoiceChat
 {
     public class EffectBase
     {
-        protected EffectsExtension effectsExtension;
-        protected int source;
-        public int effect;
-        public int slot;
-
         private EfxEffectType effectType;
+        private EffectsExtension effectsExtension;
+        private int source;
+        private int effect;
+        private int slot;
+
 
         public bool IsEnabled { get; set; } = false;
 
@@ -20,7 +21,6 @@ namespace RPVoiceChat
             this.source = source;
         }
 
-        // Override this with base.Start() in child classes
         public void Start()
         {
             if (IsEnabled) return;
@@ -29,7 +29,6 @@ namespace RPVoiceChat
             effectsExtension.BindEffect(effect, effectType);
         }
 
-        // Override with base.Stop() in child classes
         public void Stop()
         {
             if (!IsEnabled) return;
@@ -38,14 +37,27 @@ namespace RPVoiceChat
             effectsExtension.BindEffect(effect, EfxEffectType.Null);
         }
 
-        // Override this
-        public virtual void GenerateEffect(EfxEffectType type)
+        public void GenerateEffect(EfxEffectType type)
         {
             effect = effectsExtension.GenEffect();
             slot = effectsExtension.GenAuxiliaryEffectSlot();
 
             effectsExtension.AuxiliaryEffectSlot(slot, EfxAuxiliaryi.EffectslotEffect, effect);
             effectsExtension.BindSourceToAuxiliarySlot(source, slot, 0, 0);
+        }
+
+        protected void SetEffectSetting(EfxEffectf effectSetting, float param)
+        {
+            effectsExtension.Effect(effect, effectSetting, param);
+        }
+        protected void SetEffectSetting(EfxEffecti effectSetting, int param)
+        {
+            effectsExtension.Effect(effect, effectSetting, param);
+        }
+        protected void SetEffectSetting(EfxEffect3f effectSetting, float param1, float param2, float param3)
+        {
+            var params3f = new Vector3(param1, param2, param3);
+            effectsExtension.Effect(effect, effectSetting, ref params3f);
         }
     }
 }
