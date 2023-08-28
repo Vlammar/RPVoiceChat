@@ -6,6 +6,7 @@ using Vintagestory.API.Client;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace RPVoiceChat
 {
@@ -60,11 +61,21 @@ namespace RPVoiceChat
             config = ModConfig.Config;
             MaxInputThreshold = config.MaxInputThreshold;
             SetThreshold(config.InputThreshold);
-            capture = new AudioCapture(config.CurrentInputDevice, Frequency, ALFormat.Mono16, BufferSize);
+            try
+            { 
+                capture = new AudioCapture(config.CurrentInputDevice, Frequency, ALFormat.Mono16, BufferSize);
+            }
+            catch
+            {
+                return;
+            }
+
         }
 
         public void Launch()
         {
+            if ( capture == null ) return;
+
             audioProcessingThread.Start();
             gameTickId = capi.Event.RegisterGameTickListener(UpdateCaptureAudioSamples, 100);
             capture.Start();
@@ -82,6 +93,8 @@ namespace RPVoiceChat
 
         public void Dispose()
         {
+            if (capture == null) return;
+
             capi.Event.UnregisterGameTickListener(gameTickId);
             gameTickId = 0;
             audioProcessingThread.Abort();
