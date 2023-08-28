@@ -16,20 +16,20 @@ namespace RPVoiceChat
         private Vec3f lastSpeakerCoords;
 
 
-        public new VoiceLevel VoiceLevel { get; private set; } = VoiceLevel.Talking;
+        public VoiceLevel VoiceLevel { get; private set; } = VoiceLevel.Talking;
 
-        public IPlayer Player { get; private set; }
+        public IPlayer AudioOriginator { get; private set; }
 
         private FilterLowpass lowpassFilter;
 
-        public DynamicAudioSource(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
+        public DynamicAudioSource(IPlayer AudioOriginator, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
         {
-            this.Player = player;
+            this.AudioOriginator = AudioOriginator;
             IsLocational = true;
             
             capi.Event.EnqueueMainThreadTask(() =>
             {
-                lastSpeakerCoords = player.Entity?.SidedPos?.XYZFloat;
+                lastSpeakerCoords = AudioOriginator.Entity?.SidedPos?.XYZFloat;
             }, "PlayerAudioSource Init");
         }
 
@@ -47,7 +47,7 @@ namespace RPVoiceChat
 
         public new void UpdateSource(float dt)
         {
-            EntityPos speakerPos = Player.Entity?.SidedPos;
+            EntityPos speakerPos = AudioOriginator.Entity?.SidedPos;
             EntityPos listenerPos = capi.World.Player.Entity?.SidedPos;
             if (speakerPos == null || listenerPos == null)
 
@@ -57,7 +57,7 @@ namespace RPVoiceChat
             BlockSelection blocks = new BlockSelection();
             EntitySelection entities = new EntitySelection();
             capi.World.RayTraceForSelection(
-                LocationUtils.GetLocationOfPlayer(Player),
+                LocationUtils.GetLocationOfPlayer(AudioOriginator),
                 LocationUtils.GetLocationOfPlayer(capi),
                 ref blocks,
                 ref entities
@@ -91,16 +91,16 @@ namespace RPVoiceChat
 
             // If the player has a temporal stability of less than 0.7, then the player's voice should be distorted
             // Values are temporary currently
-            if (Player.Entity.WatchedAttributes.GetDouble("temporalStability") < 0.5)
+            if (AudioOriginator.Entity.WatchedAttributes.GetDouble("temporalStability") < 0.5)
             {
 
             }
 
             // If the player is drunk, then the player's voice should be affected
             // Values are temporary currently
-            if (Player.Entity.WatchedAttributes.GetFloat("intoxication") > 0.2)
+            if (AudioOriginator.Entity.WatchedAttributes.GetFloat("intoxication") > 0.2)
             {
-                var drunkness = Player.Entity.WatchedAttributes.GetFloat("intoxication");
+                var drunkness = AudioOriginator.Entity.WatchedAttributes.GetFloat("intoxication");
                 var pitch = 1 - (drunkness / 2);
                 AL.Source(source, ALSourcef.Pitch, pitch);
                 Util.CheckError("Error setting source Pitch", capi);

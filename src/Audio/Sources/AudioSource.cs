@@ -1,4 +1,5 @@
-﻿using OpenTK.Audio.OpenAL;
+﻿using HarmonyLib;
+using OpenTK.Audio.OpenAL;
 using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
@@ -21,7 +22,6 @@ namespace RPVoiceChat
         public bool IsMuffled { get; set; } = false;
         public bool IsReverberated { get; set; } = false;
         public bool IsLocational { get; set; }
-        public VoiceLevel VoiceLevel { get; set; } = VoiceLevel.Talking;
         protected static Dictionary<VoiceLevel, string> configKeyByVoiceLevel = new Dictionary<VoiceLevel, string>
         {
             { VoiceLevel.Whispering, "rpvoicechat:distance-whisper" },

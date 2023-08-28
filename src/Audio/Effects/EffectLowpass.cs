@@ -4,9 +4,13 @@ namespace RPVoiceChat
 {
     public class EffectLowpass : EffectBase
     {
+
+        // Without finding out some way to make a custom sound effect
+        // this equalizer effect is the closest we can get to a lowpass
+        // filter as an effect
+
         public EffectLowpass(EffectsExtension effectsExtension, int source) : base(effectsExtension, source)
         {
-            // Not sure this is gonna give the best effect as we have no choice over the frequencies being affected
             GenerateEffect(EfxEffectType.Equalizer);
 
             SetEffectSetting(EfxEffectf.EqualizerHighCutoff, 0f);

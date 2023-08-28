@@ -27,10 +27,21 @@ namespace RPVoiceChat
             return GetSpeakerLocation(player.Entity.Pos);
         }
 
+        public static Vec3d GetLocationOfPlayer(Entity entity)
+        {
+            if (entity == null)
+                throw new Exception("entity is null");
+
+            if (entity.Swimming)
+                return (entity.Pos.XYZ + new Vec3d(0, 0.5, 0));
+
+            return GetSpeakerLocation(entity.Pos);
+        }
+
         public static Vec3d GetLocationOfPlayer(EntityPos pos)
         {
             if (pos == null)
-                throw new Exception("entity is null");
+                throw new Exception("entity pos is null");
 
             return GetSpeakerLocation(pos);
         }
