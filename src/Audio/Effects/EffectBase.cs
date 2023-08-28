@@ -37,7 +37,7 @@ namespace RPVoiceChat
             effectsExtension.BindEffect(effect, EfxEffectType.Null);
         }
 
-        public void GenerateEffect(EfxEffectType type)
+        protected void GenerateEffect(EfxEffectType type)
         {
             effect = effectsExtension.GenEffect();
             slot = effectsExtension.GenAuxiliaryEffectSlot();
