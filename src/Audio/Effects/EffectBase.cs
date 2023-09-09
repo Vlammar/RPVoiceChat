@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using Newtonsoft.Json.Linq;
+using OpenTK;
 using OpenTK.Audio.OpenAL;
 using RPVoiceChat.Audio;
 
@@ -19,44 +20,41 @@ namespace RPVoiceChat
             this.effectsExtension = effectsExtension;
             this.source = source;
             this.effectType = efxType;
-            GenerateEffect(efxType);
+            GenerateEffect();
         }
 
-        private void GenerateEffect(EfxEffectType type)
+        private void GenerateEffect()
         {
             OALW.ExecuteInContext(() =>
             {
                 effect = effectsExtension.GenEffect();
                 slot = effectsExtension.GenAuxiliaryEffectSlot();
 
+
                 effectsExtension.AuxiliaryEffectSlot(slot, EfxAuxiliaryi.EffectslotEffect, effect);
                 effectsExtension.BindSourceToAuxiliarySlot(source, slot, 0, 0);
             });
+            OALW.CheckError($"Error generating effect {effectType}");
         }
 
         protected void SetEffectProperty(EfxEffectf param, float value)
         {
-            OALW.ExecuteInContext(() =>
-            {
-                effectsExtension.Effect(effect, param, value);
-            });
+            effectsExtension.Effect(effect, param, value);
+            OALW.CheckError($"Error setting effect {param} with {value}");
         }
 
         protected void SetEffectProperty(EfxEffecti param, int value)
         {
-            OALW.ExecuteInContext(() =>
-            {
-                effectsExtension.Effect(effect, param, value);
-            });
+            effectsExtension.Effect(effect, param, value);
+            OALW.CheckError($"Error setting effect {param} with {value}");
         }
 
         protected void SetEffectProperty(EfxEffect3f param, float value1, float value2, float value3)
         {
             var params3f = new Vector3(value1, value2, value3);
-            OALW.ExecuteInContext(() =>
-            {
-                effectsExtension.Effect(effect, param, ref params3f);
-            });
+            effectsExtension.Effect(effect, param, ref params3f);
+
+            OALW.CheckError($"Error setting effect {param} with {value1}, {value2}, and {value3}");
         }
 
         protected void SetEffectProperty(EfxEffect3f param, float[] values)
@@ -75,6 +73,7 @@ namespace RPVoiceChat
                 {
                     effectsExtension.BindEffect(effect, effectType);
                 });
+                OALW.CheckError($"Error binding effect {effectType}");
             }
         }
 
@@ -88,6 +87,7 @@ namespace RPVoiceChat
                 {
                     effectsExtension.BindEffect(effect, EfxEffectType.Null);
                 });
+                OALW.CheckError($"Error unbinding effect {effectType}");
             }
         }
     }
