@@ -8,5 +8,8 @@
         public void EnqueueAudio(AudioData audio, long sequenceNumber);
 
         public void DequeueAudio(float _);
+
+        public void StartPlaying();
+        public void StopPlaying();
     }
 }

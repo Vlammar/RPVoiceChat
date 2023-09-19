@@ -23,7 +23,7 @@ namespace RPVoiceChat.Audio
 
         /// <summary>
         /// Creates a dynamic audio source.
-        /// This audio source moves relative to the world.
+        /// This audio source moves relative to the world. (Used for stuff like players or other entities)
         /// </summary>
         /// <param name="player"></param>
         /// <param name="manager"></param>
