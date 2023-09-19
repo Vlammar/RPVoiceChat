@@ -5,28 +5,13 @@ using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Common.Entities;
 using RPVoiceChat.Utils;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace RPVoiceChat.Audio
 {
-    public class PlayerAudioSource : IDisposable
+    public class DynamicAudioSource : AudioSource, IAudioSource
     {
-        private const int BufferCount = 20;
-        private int source;
-        private CircularAudioBuffer buffer;
-        private SortedList orderingQueue = SortedList.Synchronized(new SortedList());
-        private int orderingDelay = 100;
-        private long lastAudioSequenceNumber = -1;
-        private Dictionary<string, IAudioCodec> codecs = new Dictionary<string, IAudioCodec>();
-        private FilterLowpass lowpassFilter;
-        private EffectsExtension effectsExtension;
-
-        private ICoreClientAPI capi;
         private IPlayer player;
-        private AudioOutputManager outputManager;
-
-        public bool IsLocational { get; set; } = true;
         public VoiceLevel voiceLevel { get; private set; } = VoiceLevel.Talking;
         private Dictionary<VoiceLevel, float> referenceDistanceByVoiceLevel = new Dictionary<VoiceLevel, float>()
         {
@@ -35,26 +20,19 @@ namespace RPVoiceChat.Audio
             { VoiceLevel.Shouting, 6.25f },
         };
         private Vec3f lastSpeakerCoords;
-        private DateTime? lastSpeakerUpdate;
 
-        public PlayerAudioSource(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi)
+        /// <summary>
+        /// Creates a dynamic audio source.
+        /// This audio source moves relative to the world.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="manager"></param>
+        /// <param name="capi"></param>
+        public DynamicAudioSource(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
         {
-            effectsExtension = manager.effectsExtension;
-            outputManager = manager;
             this.player = player;
-            this.capi = capi;
 
             lastSpeakerCoords = player.Entity?.SidedPos?.XYZFloat;
-            lastSpeakerUpdate = DateTime.Now;
-
-            source = OALW.GenSource();
-            buffer = new CircularAudioBuffer(source, BufferCount);
-
-            float gain = Math.Min(PlayerListener.gain, 1);
-            OALW.Source(source, ALSourceb.Looping, false);
-            OALW.Source(source, ALSourceb.SourceRelative, true);
-            OALW.Source(source, ALSourcef.Gain, gain);
-            OALW.Source(source, ALSourcef.Pitch, 1.0f);
 
             UpdateVoiceLevel(voiceLevel);
         }
@@ -70,21 +48,7 @@ namespace RPVoiceChat.Audio
             OALW.Source(source, ALSourcef.RolloffFactor, rolloffFactor);
         }
 
-        public IAudioCodec GetOrCreateAudioCodec(int frequency, int channels)
-        {
-            string codecSettings = $"{frequency}:{channels}";
-            IAudioCodec codec;
-
-            if (!codecs.TryGetValue(codecSettings, out codec))
-            {
-                codec = new OpusCodec(frequency, channels);
-                codecs.Add(codecSettings, codec);
-            }
-
-            return codec;
-        }
-
-        public void UpdatePlayer()
+        public void UpdateSource()
         {
             EntityPos speakerPos = player.Entity?.SidedPos;
             EntityPos listenerPos = capi.World.Player.Entity?.SidedPos;
@@ -101,7 +65,7 @@ namespace RPVoiceChat.Audio
             {
                 lowpassFilter = lowpassFilter ?? new FilterLowpass(effectsExtension, source);
                 lowpassFilter.Start();
-                lowpassFilter.SetHFGain(Math.Max(1.0f - (wallThickness / 2), 0.1f));
+                lowpassFilter.SetHFGain(Math.Max(1.0f - wallThickness / 2, 0.1f));
             }
 
             // If the player is in a reverberated area, then the player's voice should be reverberated
@@ -186,68 +150,6 @@ namespace RPVoiceChat.Audio
             return velocity;
         }
 
-        public void EnqueueAudio(AudioData audio, long sequenceNumber)
-        {
-            if (orderingQueue.ContainsKey(sequenceNumber))
-            {
-                Logger.client.Debug("Audio sequence already received, skipping enqueueing");
-                return;
-            }
 
-            if (lastAudioSequenceNumber > sequenceNumber)
-            {
-                Logger.client.Debug("Audio sequence arrived too late, skipping enqueueing");
-                return;
-            }
-
-            orderingQueue.Add(sequenceNumber, audio);
-            capi.Event.EnqueueMainThreadTask(() =>
-            {
-                capi.Event.RegisterCallback(DequeueAudio, orderingDelay);
-            }, "PlayerAudioSource EnqueueAudio");
-        }
-
-        public void DequeueAudio(float _)
-        {
-            AudioData audio;
-
-            lock (orderingQueue.SyncRoot)
-            {
-                audio = orderingQueue.GetByIndex(0) as AudioData;
-                lastAudioSequenceNumber = (long)orderingQueue.GetKey(0);
-                orderingQueue.RemoveAt(0);
-            }
-
-            var state = OALW.GetSourceState(source);
-            if (state == ALSourceState.Stopped)
-                buffer.TryDequeueBuffers(); //Calling this can dequeue unprocessed audio so we want to make sure the source is stopped
-
-            byte[] audioBytes = audio.data;
-            buffer.QueueAudio(audioBytes, audioBytes.Length, audio.format, audio.frequency);
-
-            // The source can stop playing if it finishes everything in queue
-            if (state != ALSourceState.Playing)
-            {
-                StartPlaying();
-            }
-        }
-
-        public void StartPlaying()
-        {
-            OALW.SourcePlay(source);
-        }
-
-        public void StopPlaying()
-        {
-            OALW.SourceStop(source);
-        }
-
-        public void Dispose()
-        {
-            OALW.SourceStop(source);
-
-            buffer?.Dispose();
-            OALW.DeleteSource(source);
-        }
     }
 }

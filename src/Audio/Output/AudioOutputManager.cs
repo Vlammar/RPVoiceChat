@@ -34,8 +34,8 @@ namespace RPVoiceChat.Audio
 
         public bool isReady = false;
         public EffectsExtension effectsExtension;
-        private ConcurrentDictionary<string, PlayerAudioSource> playerSources = new ConcurrentDictionary<string, PlayerAudioSource>();
-        private PlayerAudioSource localPlayerAudioSource;
+        private ConcurrentDictionary<string, DynamicAudioSource> playerSources = new ConcurrentDictionary<string, DynamicAudioSource>();
+        private DynamicAudioSource localPlayerAudioSource;
 
         public AudioOutputManager(ICoreClientAPI api)
         {
@@ -64,7 +64,7 @@ namespace RPVoiceChat.Audio
                 return;
             }
 
-            PlayerAudioSource source;
+            DynamicAudioSource source;
             string playerId = packet.PlayerId;
 
             if (!playerSources.TryGetValue(playerId, out source))
@@ -76,7 +76,7 @@ namespace RPVoiceChat.Audio
                     return;
                 }
 
-                source = new PlayerAudioSource(player, this, capi);
+                source = new DynamicAudioSource(player, this, capi);
                 if (!playerSources.TryAdd(playerId, source))
                 {
                     Logger.client.Debug("Could not add new player to sources");
@@ -86,7 +86,7 @@ namespace RPVoiceChat.Audio
             HandleAudioPacket(packet, source);
         }
 
-        public void HandleAudioPacket(AudioPacket packet, PlayerAudioSource source)
+        public void HandleAudioPacket(AudioPacket packet, DynamicAudioSource source)
         {
             int frequency = packet.Frequency;
             int channels = AudioUtils.ChannelsPerFormat(packet.Format);
@@ -97,7 +97,7 @@ namespace RPVoiceChat.Audio
             // Update the voice level if it has changed
             if (source.voiceLevel != packet.VoiceLevel)
                 source.UpdateVoiceLevel(packet.VoiceLevel);
-            source.UpdatePlayer();
+            source.UpdateSource();
             source.EnqueueAudio(audioData, packet.SequenceNumber);
         }
 
@@ -110,7 +110,7 @@ namespace RPVoiceChat.Audio
 
         public void ClientLoaded()
         {
-            localPlayerAudioSource = new PlayerAudioSource(capi.World.Player, this, capi)
+            localPlayerAudioSource = new DynamicAudioSource(capi.World.Player, this, capi)
             {
                 IsLocational = false,
             };
@@ -123,7 +123,7 @@ namespace RPVoiceChat.Audio
         {
             if (player.ClientId == capi.World.Player.ClientId) return;
 
-            var playerSource = new PlayerAudioSource(player, this, capi)
+            var playerSource = new DynamicAudioSource(player, this, capi)
             {
                 IsLocational = true,
             };
