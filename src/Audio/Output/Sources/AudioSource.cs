@@ -9,6 +9,12 @@ using Vintagestory.API.MathTools;
 
 namespace RPVoiceChat.Audio
 {
+    public enum SourceType
+    {
+        Static,
+        Dynamic
+    }
+
     public class AudioSource : IDisposable
     {
         protected const int BufferCount = 20;
@@ -27,6 +33,9 @@ namespace RPVoiceChat.Audio
         public bool IsLocational { get; set; } = true;
 
         protected DateTime? lastSpeakerUpdate;
+
+        public string SourceID { get; protected set; } = "";
+        public SourceType SourceType { get; protected set; }
 
         public AudioSource(AudioOutputManager manager, ICoreClientAPI capi)
         {
@@ -78,7 +87,7 @@ namespace RPVoiceChat.Audio
             capi.Event.EnqueueMainThreadTask(() =>
             {
                 capi.Event.RegisterCallback(DequeueAudio, orderingDelay);
-            }, "PlayerAudioSource EnqueueAudio");
+            }, "AudioSource EnqueueAudio");
         }
 
         public void DequeueAudio(float _)
@@ -105,6 +114,8 @@ namespace RPVoiceChat.Audio
                 StartPlaying();
             }
         }
+
+        public virtual void UpdateSource() {}
 
         public void StartPlaying()
         {

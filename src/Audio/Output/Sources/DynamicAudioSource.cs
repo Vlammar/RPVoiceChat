@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace RPVoiceChat.Audio
 {
-    public class DynamicAudioSource : AudioSource, IAudioSource
+    public class DynamicAudioSource : AudioSource
     {
         private IPlayer player;
         public VoiceLevel voiceLevel { get; private set; } = VoiceLevel.Talking;
@@ -30,6 +30,8 @@ namespace RPVoiceChat.Audio
         /// <param name="capi"></param>
         public DynamicAudioSource(IPlayer player, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
         {
+            this.SourceType = SourceType.Dynamic;
+
             this.player = player;
 
             lastSpeakerCoords = player.Entity?.SidedPos?.XYZFloat;
@@ -48,7 +50,7 @@ namespace RPVoiceChat.Audio
             OALW.Source(source, ALSourcef.RolloffFactor, rolloffFactor);
         }
 
-        public void UpdateSource()
+        public override void UpdateSource()
         {
             EntityPos speakerPos = player.Entity?.SidedPos;
             EntityPos listenerPos = capi.World.Player.Entity?.SidedPos;

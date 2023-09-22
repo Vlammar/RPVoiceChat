@@ -34,7 +34,7 @@ namespace RPVoiceChat.Audio
 
         public bool isReady = false;
         public EffectsExtension effectsExtension;
-        private ConcurrentDictionary<string, DynamicAudioSource> playerSources = new ConcurrentDictionary<string, DynamicAudioSource>();
+        private ConcurrentDictionary<string, AudioSource> playerSources = new ConcurrentDictionary<string, AudioSource>();
         private DynamicAudioSource localPlayerAudioSource;
 
         public AudioOutputManager(ICoreClientAPI api)
@@ -64,7 +64,7 @@ namespace RPVoiceChat.Audio
                 return;
             }
 
-            DynamicAudioSource source;
+            AudioSource source;
             string playerId = packet.PlayerId;
 
             if (!playerSources.TryGetValue(playerId, out source))
@@ -86,7 +86,7 @@ namespace RPVoiceChat.Audio
             HandleAudioPacket(packet, source);
         }
 
-        public void HandleAudioPacket(AudioPacket packet, DynamicAudioSource source)
+        public void HandleAudioPacket(AudioPacket packet, AudioSource source)
         {
             int frequency = packet.Frequency;
             int channels = AudioUtils.ChannelsPerFormat(packet.Format);
@@ -94,9 +94,14 @@ namespace RPVoiceChat.Audio
             IAudioCodec codec = source.GetOrCreateAudioCodec(frequency, channels);
             AudioData audioData = AudioData.FromPacket(packet, codec);
 
-            // Update the voice level if it has changed
-            if (source.voiceLevel != packet.VoiceLevel)
-                source.UpdateVoiceLevel(packet.VoiceLevel);
+            var dynamicSource = source as DynamicAudioSource;
+            if (dynamicSource != null) 
+            {
+                // Update the voice level if it has changed
+                if (dynamicSource.voiceLevel != packet.VoiceLevel)
+                    dynamicSource.UpdateVoiceLevel(packet.VoiceLevel);
+            }
+
             source.UpdateSource();
             source.EnqueueAudio(audioData, packet.SequenceNumber);
         }

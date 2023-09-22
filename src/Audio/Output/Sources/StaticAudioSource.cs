@@ -8,7 +8,7 @@ using Vintagestory.API.MathTools;
 
 namespace RPVoiceChat.Audio
 {
-    public class StaticAudioSource : AudioSource, IAudioSource
+    public class StaticAudioSource : AudioSource
     {
         private Vec3f coords;
 
@@ -20,12 +20,8 @@ namespace RPVoiceChat.Audio
         /// <param name="capi"></param>
         public StaticAudioSource(Vec3f vec3f, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
         {
+            this.SourceType = SourceType.Static;
             coords = vec3f;
-        }
-
-        public StaticAudioSource(BlockPos blockPos, AudioOutputManager manager, ICoreClientAPI capi) : base(manager, capi)
-        {
-            coords = blockPos.ToVec3f();
         }
 
         private Vec3f GetRelativeSourcePosition()
@@ -33,7 +29,7 @@ namespace RPVoiceChat.Audio
             return coords - capi.World.Player.Entity?.SidedPos.AsBlockPos.ToVec3f();
         }
 
-        public void UpdateSource()
+        public override void UpdateSource()
         {
 
             EntityPos listenerPos = capi.World.Player.Entity?.SidedPos;
